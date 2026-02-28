@@ -1,16 +1,7 @@
-<div align="center">
 
 <h1>🛡️ NyayaShakti</h1>
 <h3>Women's Safety Platform — Your Safety Is Non-Negotiable. Your Power Is Real.</h3>
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-nyayashakthi.onrender.com-C8102E?style=for-the-badge&logo=render)](https://nyayashakthi.onrender.com)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-5.0.6-092E20?style=for-the-badge&logo=django)](https://djangoproject.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-
-</div>
-
----
 
 ## 📖 Project Description
 
@@ -57,22 +48,6 @@ Six national emergency numbers (112, 1091, 100, 108, 1098, 181) displayed on the
 ---
 
 ## 🖥️ Screenshots
-
-> **Add 3+ screenshots here.** Place images in a `docs/screenshots/` folder and reference them below.
-
-| Homepage | SOS Page | Help Map |
-|---|---|---|
-| ![Homepage](docs/screenshots/homepage.png) | ![SOS](docs/screenshots/sos.png) | ![Map](docs/screenshots/map.png) |
-
-| Support Chat | Mobile View |
-|---|---|
-| ![Chat](docs/screenshots/chat.png) | ![Mobile](docs/screenshots/mobile.png) |
-
----
-
-## 🎬 Demo Video
-
-> 📹 [Watch Demo on YouTube / Google Drive](#) ← *Replace with your actual link*
 
 The demo covers:
 - Triggering the SOS alert with live location
@@ -176,7 +151,7 @@ nyayashakthi/
 
 ### Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/nyayashakthi.git
+git clone https://github.com/hannashereef/nyayashakthi
 cd nyayashakthi
 ```
 
@@ -195,125 +170,11 @@ python manage.py runserver
 http://localhost:8000
 ```
 
-> ✅ No migrations needed — there is no database.
 
 ---
 
-## 🚀 Deployment (Render — Free Plan)
 
-### 1. Push to GitHub
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/nyayashakthi.git
-git push -u origin main
-```
 
-### 2. Create a Render Web Service
-- Go to [render.com](https://render.com) → New → Web Service
-- Connect your GitHub repository
-- Set the following:
-
-| Field | Value |
-|---|---|
-| Runtime | Python 3 |
-| Build Command | `pip install -r requirements.txt && python manage.py collectstatic --noinput` |
-| Start Command | `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT` |
-| Instance Type | Free |
-
-### 3. Set Environment Variables
-| Key | Value |
-|---|---|
-| `DJANGO_SECRET_KEY` | Generate a random 60-char string |
-| `DEBUG` | `False` |
-
-```bash
-# Generate a secret key locally:
-python -c "import secrets; print(secrets.token_urlsafe(60))"
-```
-
-### 4. Deploy
-Click **"Create Web Service"** — Render builds and deploys automatically. Live in ~2 minutes.
-
----
-
-## 🔌 API Documentation
-
-### `POST /api/sos-alert/`
-Receives GPS coordinates, returns a formatted emergency alert payload.
-
-**Request:**
-```json
-{
-  "lat": 9.654591,
-  "lng": 76.827902,
-  "accuracy": 12
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "timestamp": "28 Feb 2026, 10:45 AM IST",
-  "maps_link": "https://www.google.com/maps?q=9.654591,76.827902",
-  "whatsapp_link": "https://wa.me/?text=🚨 EMERGENCY SOS...",
-  "sms_text": "🚨 EMERGENCY SOS – NyayaShakti\nTime: ...\nLocation: ...",
-  "contacts": [{ "name": "National Emergency", "phone": "112" }]
-}
-```
-
----
-
-### `GET /api/help-centers/`
-Returns all predefined help centres. Optional `type` filter.
-
-**Query Parameters:**
-
-| Param | Values |
-|---|---|
-| `type` | `police` \| `hospital` \| `support` |
-
-**Example:** `GET /api/help-centers/?type=police`
-
-**Response:**
-```json
-{
-  "centers": [
-    {
-      "id": 1,
-      "name": "Tripunithura Police Station",
-      "type": "police",
-      "lat": 9.9450,
-      "lng": 76.3390,
-      "phone": "0484-2781520",
-      "address": "Mini Bypass Road, Tripunithura, Ernakulam",
-      "hours": "24/7"
-    }
-  ],
-  "total": 3
-}
-```
-
----
-
-### `POST /api/chat-response/`
-Returns a context-aware support response. Stateless — nothing stored.
-
-**Request:**
-```json
-{ "message": "I feel unsafe at home" }
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "response": "What you're describing is not okay and you deserve support. The Women Helpline (1091) can connect you with counsellors 24/7.",
-  "timestamp": "10:47 PM"
-}
-```
 
 **Keyword routing logic:**
 
@@ -326,78 +187,5 @@ Returns a context-aware support response. Stateless — nothing stored.
 | *(no match)* | Random from 9 supportive responses |
 
 ---
-
-## 🔒 Privacy & Security
-
-- **No database** — zero persistent storage of any kind
-- **Anonymous chat** — messages exist only in browser memory (JavaScript DOM)
-- **No login required** — instant access, no accounts
-- **CSRF protected** — all POST endpoints use Django CSRF tokens
-- **HTTPS enforced** — via Render's edge network in production
-- **No PII collected** — the app never asks for name, email, or phone number
-
----
-
-## 📞 Emergency Helplines (India)
-
-| Service | Number | Hours |
-|---|---|---|
-| National Emergency | 112 | 24/7 |
-| Women Helpline | 1091 | 24/7 |
-| Police | 100 | 24/7 |
-| Ambulance | 108 | 24/7 |
-| Child Helpline | 1098 | 24/7 |
-| Domestic Violence | 181 | 24/7 |
-
----
-
-## 👥 Team Members
-
-| Name | Role |
-|---|---|
-| *(Your Name)* | Full Stack Developer |
-
----
-
-## 🤖 AI Tools Used
-
-This project was built with assistance from **Claude (Anthropic)** for:
-- Full-stack Django project scaffolding
-- Frontend HTML/CSS/JS design and implementation
-- REST API endpoint logic
-- Deployment configuration (Render)
-- Documentation generation
-
-**Prompts used include:**
-- *"Build a Django women's safety platform with SOS, map, and anonymous chat — no database"*
-- *"Show help centres near coordinates 9.654591, 76.827902 on OpenStreetMap using Leaflet"*
-- *"Guide me to deploy this Django app on Render free plan"*
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2024 NyayaShakti
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-```
-
----
-
-<div align="center">
-  <strong>🛡️ NyayaShakti — Built for safety, dignity, and justice.</strong><br/>
-  <sub>Made with ❤️ in Kerala, India</sub>
-</div>
+Demo video
+https://drive.google.com/file/d/1InghM9OetR6UjbxjFwY5A_piGM5q4sZL/view?usp=drive_link
