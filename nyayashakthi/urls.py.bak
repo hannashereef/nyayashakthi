@@ -1,0 +1,16 @@
+from django.urls import path
+from . import views
+
+app_name = 'nyayashakthi'
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('sos/', views.sos_view, name='sos'),
+    path('map/', views.map_view, name='map'),
+    path('chat/', views.chat_view, name='chat'),
+
+    # API endpoints
+    path('api/sos-alert/', views.api_sos_alert, name='api_sos_alert'),
+    path('api/help-centers/', views.api_help_centers, name='api_help_centers'),
+    path('api/chat-response/', views.api_chat_response, name='api_chat_response'),
+]

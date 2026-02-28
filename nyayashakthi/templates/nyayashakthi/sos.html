@@ -1,0 +1,406 @@
+{% extends "nyayashakthi/base.html" %}
+{% block title %}Emergency SOS – NyayaShakti{% endblock %}
+
+{% block extra_head %}
+<style>
+  .sos-page {
+    min-height: calc(100vh - var(--nav-h));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 30%, rgba(200,16,46,.07) 0%, transparent 70%),
+      var(--ivory);
+    text-align: center;
+  }
+
+  .sos-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(200,16,46,.1);
+    border: 1px solid rgba(200,16,46,.25);
+    color: var(--crimson);
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--crimson);
+    border-radius: 50%;
+    animation: blink 1s infinite;
+    display: inline-block;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+  .sos-title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+  .sos-subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 48px;
+    max-width: 420px;
+  }
+
+  /* ── Giant SOS Button ──────────────────────────────────────────── */
+  .sos-btn-container {
+    position: relative;
+    margin-bottom: 48px;
+  }
+
+  .sos-orbit {
+    position: absolute;
+    inset: -32px;
+    border-radius: 50%;
+    border: 2px solid rgba(200,16,46,.2);
+    animation: orbit 3s linear infinite;
+  }
+  .sos-orbit::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 10px; height: 10px;
+    background: var(--crimson);
+    border-radius: 50%;
+  }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+
+  .sos-ring {
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    border: 3px dashed rgba(200,16,46,.15);
+    animation: ring-spin 8s linear infinite reverse;
+  }
+  @keyframes ring-spin { to { transform: rotate(360deg); } }
+
+  .sos-main-btn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--crimson-lt), var(--crimson), var(--crimson-dk));
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-shadow:
+      0 0 0 0 rgba(200,16,46,.5),
+      0 20px 60px rgba(200,16,46,.4);
+    transition: all .2s ease;
+    position: relative;
+    z-index: 1;
+    animation: sos-pulse 2.5s ease-in-out infinite;
+  }
+  .sos-main-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 20px rgba(200,16,46,.1), 0 30px 80px rgba(200,16,46,.5);
+  }
+  .sos-main-btn:active { transform: scale(.96); }
+  .sos-main-btn.triggered {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    animation: none !important;
+    box-shadow: 0 20px 60px rgba(34,197,94,.4);
+  }
+
+  @keyframes sos-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,16,46,.5), 0 20px 60px rgba(200,16,46,.4); }
+    50%       { box-shadow: 0 0 0 20px rgba(200,16,46,0), 0 20px 60px rgba(200,16,46,.4); }
+  }
+
+  .sos-main-btn__icon { font-size: 60px; line-height: 1; }
+  .sos-main-btn__label { color: #fff; font-weight: 800; font-size: 22px; letter-spacing: 0.1em; }
+  .sos-main-btn__hint { color: rgba(255,255,255,.75); font-size: 11px; letter-spacing: 0.05em; }
+
+  /* ── Location Status ───────────────────────────────────────────── */
+  .location-status {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 28px;
+    margin-bottom: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    max-width: 420px;
+  }
+  .loc-indicator { width: 10px; height: 10px; border-radius: 50%; background: #ccc; flex-shrink: 0; transition: var(--transition); }
+  .loc-indicator.acquiring { background: var(--saffron); animation: blink .8s infinite; }
+  .loc-indicator.ready { background: var(--success); }
+  .loc-indicator.denied { background: var(--crimson); }
+  #loc-text { color: var(--muted); }
+
+  /* ── Alert Result ──────────────────────────────────────────────── */
+  #alert-result {
+    display: none;
+    background: #fff;
+    border: 2px solid rgba(34,197,94,.3);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    max-width: 480px;
+    width: 100%;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+  .result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .result-header h3 { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--success); }
+  .result-time { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .result-actions { display: flex; flex-direction: column; gap: 10px; }
+  .result-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--ivory);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .result-btn:hover { border-color: var(--crimson); color: var(--crimson); background: rgba(200,16,46,.04); }
+  .result-btn.primary { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+  .result-btn.primary:hover { background: var(--crimson-dk); }
+
+  /* ── Contacts Grid ─────────────────────────────────────────────── */
+  .contacts-quick {
+    width: 100%;
+    max-width: 640px;
+  }
+  .contacts-quick h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 16px;
+  }
+  .contacts-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .qcontact {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+  .qcontact:hover { border-color: var(--crimson); box-shadow: var(--shadow-sm); }
+  .qcontact__icon { font-size: 24px; }
+  .qcontact__name { font-size: 12px; color: var(--muted); }
+  .qcontact__num { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--crimson); }
+
+  @media (max-width: 480px) {
+    .sos-main-btn { width: 180px; height: 180px; }
+    .sos-main-btn__icon { font-size: 52px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sos-page">
+
+  <div class="sos-badge">
+    <span class="live-dot"></span>
+    Emergency Response
+  </div>
+
+  <h1 class="sos-title">Emergency SOS</h1>
+  <p class="sos-subtitle">Press the button to instantly share your live location with emergency contacts and responders.</p>
+
+  <!-- SOS Button -->
+  <div class="sos-btn-container">
+    <div class="sos-orbit"></div>
+    <div class="sos-ring"></div>
+    <button class="sos-main-btn" id="sosBtn" onclick="triggerSOS()">
+      <span class="sos-main-btn__icon">🆘</span>
+      <span class="sos-main-btn__label">SOS</span>
+      <span class="sos-main-btn__hint">PRESS TO ALERT</span>
+    </button>
+  </div>
+
+  <!-- Location status -->
+  <div class="location-status">
+    <div class="loc-indicator acquiring" id="locIndicator"></div>
+    <div id="loc-text">Acquiring your location…</div>
+  </div>
+
+  <!-- Alert Result (shown after trigger) -->
+  <div id="alert-result">
+    <div class="result-header">
+      <span style="font-size:28px">✅</span>
+      <h3>SOS Alert Sent!</h3>
+    </div>
+    <div class="result-time" id="result-time"></div>
+    <div class="result-actions" id="result-actions"></div>
+  </div>
+
+  <!-- Quick Call Contacts -->
+  <div class="contacts-quick">
+    <h3>Quick Call</h3>
+    <div class="contacts-quick-grid">
+      {% for c in emergency_contacts %}
+      <a href="tel:{{ c.phone }}" class="qcontact">
+        <span class="qcontact__icon">{{ c.icon }}</span>
+        <div>
+          <div class="qcontact__name">{{ c.name }}</div>
+          <div class="qcontact__num">{{ c.phone }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let userLat = null, userLng = null, userAccuracy = null;
+  let sosTriggered = false;
+
+  // ── Geolocation ─────────────────────────────────────────────────
+  function initLocation() {
+    const indicator = document.getElementById('locIndicator');
+    const locText = document.getElementById('loc-text');
+
+    if (!navigator.geolocation) {
+      indicator.className = 'loc-indicator denied';
+      locText.textContent = 'Geolocation not supported by your browser.';
+      return;
+    }
+
+    navigator.geolocation.watchPosition(
+      (pos) => {
+        userLat = pos.coords.latitude.toFixed(6);
+        userLng = pos.coords.longitude.toFixed(6);
+        userAccuracy = Math.round(pos.coords.accuracy);
+        indicator.className = 'loc-indicator ready';
+        locText.textContent = `📍 Location ready · Accuracy ±${userAccuracy}m`;
+      },
+      (err) => {
+        indicator.className = 'loc-indicator denied';
+        locText.textContent = 'Location access denied. Please enable in browser settings.';
+      },
+      { enableHighAccuracy: true, maximumAge: 10000 }
+    );
+  }
+
+  // ── SOS Trigger ────────────────────────────────────────────────
+  async function triggerSOS() {
+    if (sosTriggered) return;
+    sosTriggered = true;
+
+    const btn = document.getElementById('sosBtn');
+    btn.classList.add('triggered');
+    btn.querySelector('.sos-main-btn__label').textContent = 'SENT!';
+    btn.querySelector('.sos-main-btn__hint').textContent = 'ALERT DISPATCHED';
+    btn.querySelector('.sos-main-btn__icon').textContent = '✅';
+
+    // Vibrate
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+
+    try {
+      const resp = await fetch('/api/sos-alert/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ lat: userLat, lng: userLng, accuracy: userAccuracy })
+      });
+      const data = await resp.json();
+
+      if (data.success) {
+        showAlertResult(data);
+        showToast('🚨 SOS Alert sent successfully!', 'error', 5000);
+      }
+    } catch (e) {
+      // Even if API call fails, help user share manually
+      const fallback = `🚨 SOS ALERT!\nTime: ${new Date().toLocaleString()}\nLocation: ${userLat ? `https://maps.google.com/?q=${userLat},${userLng}` : 'Unknown'}`;
+      showAlertResult({ timestamp: new Date().toLocaleString(), maps_link: userLat ? `https://maps.google.com/?q=${userLat},${userLng}` : null, sms_text: fallback });
+    }
+  }
+
+  function showAlertResult(data) {
+    const panel = document.getElementById('alert-result');
+    document.getElementById('result-time').textContent = `Sent at: ${data.timestamp}`;
+
+    const actionsEl = document.getElementById('result-actions');
+    actionsEl.innerHTML = '';
+
+    if (data.maps_link && data.maps_link !== 'Location unavailable') {
+      const a = document.createElement('a');
+      a.href = data.maps_link;
+      a.target = '_blank';
+      a.className = 'result-btn primary';
+      a.innerHTML = '📍 View My Location on Google Maps';
+      actionsEl.appendChild(a);
+    }
+
+    if (data.whatsapp_link) {
+      const wa = document.createElement('a');
+      wa.href = data.whatsapp_link;
+      wa.target = '_blank';
+      wa.className = 'result-btn';
+      wa.innerHTML = '💬 Share via WhatsApp';
+      actionsEl.appendChild(wa);
+    }
+
+    if (data.sms_text) {
+      const share = document.createElement('button');
+      share.className = 'result-btn';
+      share.innerHTML = '📤 Share Alert';
+      share.onclick = async () => {
+        if (navigator.share) {
+          await navigator.share({ title: '🚨 SOS Alert', text: data.sms_text });
+        } else {
+          navigator.clipboard.writeText(data.sms_text);
+          showToast('Alert message copied to clipboard!', 'success');
+        }
+      };
+      actionsEl.appendChild(share);
+    }
+
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(cookie.split('=')[1]);
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  initLocation();
+</script>
+{% endblock %}

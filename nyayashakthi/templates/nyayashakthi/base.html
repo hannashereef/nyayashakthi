@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NyayaShakti – Your Safety, Your Power. Emergency SOS, Nearby Help Centers & Anonymous Support." />
+  <title>{% block title %}NyayaShakti – Your Safety, Your Power{% endblock %}</title>
+  {% load static %}
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── CSS Reset & Variables ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson:    #C8102E;
+      --crimson-dk: #8B0000;
+      --crimson-lt: #FF4455;
+      --saffron:    #FF8C00;
+      --gold:       #D4A017;
+      --ivory:      #FAF7F2;
+      --warm-white: #FFF9F0;
+      --charcoal:   #1A1A1A;
+      --slate:      #2D2D2D;
+      --muted:      #6B6B6B;
+      --border:     #E8DDD0;
+      --success:    #2D7A4F;
+      --shadow-sm:  0 2px 12px rgba(200,16,46,.08);
+      --shadow-md:  0 8px 32px rgba(200,16,46,.14);
+      --shadow-lg:  0 20px 60px rgba(200,16,46,.18);
+      --radius:     12px;
+      --radius-lg:  20px;
+      --nav-h:      68px;
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+      --transition:   all .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--ivory);
+      color: var(--charcoal);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Navigation ──────────────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(250,247,242,.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+
+    .nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav__logo-mark {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--crimson), var(--saffron));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .nav__logo-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--crimson);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    .nav__logo-sub {
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+    .nav__links a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--slate);
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .nav__links a:hover, .nav__links a.active {
+      background: rgba(200,16,46,.08);
+      color: var(--crimson);
+    }
+    .nav__links .nav__sos-btn {
+      background: var(--crimson);
+      color: #fff !important;
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-weight: 600;
+      animation: pulse-nav 2s infinite;
+    }
+    .nav__links .nav__sos-btn:hover {
+      background: var(--crimson-dk);
+    }
+
+    @keyframes pulse-nav {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(200,16,46,.4); }
+      50%       { box-shadow: 0 0 0 8px rgba(200,16,46,0); }
+    }
+
+    /* Hamburger */
+    .nav__hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 6px;
+    }
+    .nav__hamburger span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--charcoal);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+    .nav__hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .nav__hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav__hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* Mobile nav drawer */
+    .nav__drawer {
+      display: none;
+      position: fixed;
+      top: var(--nav-h); left: 0; right: 0;
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px 24px;
+      z-index: 999;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: var(--shadow-md);
+    }
+    .nav__drawer.open { display: flex; }
+    .nav__drawer a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--slate);
+      font-weight: 500;
+      font-size: 15px;
+      transition: var(--transition);
+    }
+    .nav__drawer a:hover { background: rgba(200,16,46,.06); color: var(--crimson); }
+    .nav__drawer .drawer__sos {
+      background: var(--crimson);
+      color: #fff !important;
+      margin-top: 8px;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    /* ── Main Content ─────────────────────────────────────────────────── */
+    .main { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); }
+
+    /* ── Utility Classes ─────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 72px 0; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary {
+      background: var(--crimson);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(200,16,46,.3);
+    }
+    .btn-primary:hover {
+      background: var(--crimson-dk);
+      box-shadow: 0 8px 28px rgba(200,16,46,.4);
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--crimson);
+      border: 2px solid var(--crimson);
+    }
+    .btn-outline:hover {
+      background: var(--crimson);
+      color: #fff;
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,.9);
+      color: var(--charcoal);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: #fff; box-shadow: var(--shadow-sm); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .badge-red { background: rgba(200,16,46,.1); color: var(--crimson); }
+    .badge-green { background: rgba(45,122,79,.1); color: var(--success); }
+    .badge-gold { background: rgba(212,160,23,.12); color: var(--gold); }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+    /* ── Toast ───────────────────────────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--charcoal);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      pointer-events: all;
+      animation: toast-in .35s cubic-bezier(.4,0,.2,1);
+      max-width: 320px;
+      text-align: center;
+    }
+    .toast.toast-success { background: var(--success); }
+    .toast.toast-error { background: var(--crimson); }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(20px) scale(.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────────── */
+    .footer {
+      background: var(--charcoal);
+      color: rgba(255,255,255,.7);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .footer__logo {
+      font-family: var(--font-display);
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .footer__tagline { font-size: 13px; margin-bottom: 20px; }
+    .footer__links { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }
+    .footer__links a { color: rgba(255,255,255,.6); text-decoration: none; font-size: 13px; transition: var(--transition); }
+    .footer__links a:hover { color: #fff; }
+    .footer__copy { font-size: 12px; opacity: .5; }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav__links { display: none; }
+      .nav__hamburger { display: flex; }
+      :root { --nav-h: 60px; }
+      .nav__logo-text { font-size: 18px; }
+      .section { padding: 48px 0; }
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Sticky Navigation ────────────────────────────────────────────── -->
+<nav class="nav">
+  <a href="{% url 'nyayashakthi:index' %}" class="nav__logo">
+    <div class="nav__logo-mark">🛡️</div>
+    <div>
+      <div class="nav__logo-text">NyayaShakti</div>
+      <div class="nav__logo-sub">Your Safety · Your Power</div>
+    </div>
+  </a>
+
+  <ul class="nav__links">
+    <li><a href="{% url 'nyayashakthi:index' %}" {% if request.resolver_match.url_name == 'index' %}class="active"{% endif %}>🏠 Home</a></li>
+    <li><a href="{% url 'nyayashakthi:map' %}" {% if request.resolver_match.url_name == 'map' %}class="active"{% endif %}>📍 Find Help</a></li>
+    <li><a href="{% url 'nyayashakthi:chat' %}" {% if request.resolver_match.url_name == 'chat' %}class="active"{% endif %}>💬 Support Chat</a></li>
+    <li><a href="{% url 'nyayashakthi:sos' %}" class="nav__sos-btn">🚨 SOS</a></li>
+  </ul>
+
+  <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Drawer -->
+<div class="nav__drawer" id="drawer">
+  <a href="{% url 'nyayashakthi:index' %}">🏠 Home</a>
+  <a href="{% url 'nyayashakthi:map' %}">📍 Find Help Near Me</a>
+  <a href="{% url 'nyayashakthi:chat' %}">💬 Anonymous Support Chat</a>
+  <a href="{% url 'nyayashakthi:sos' %}" class="drawer__sos">🚨 EMERGENCY SOS</a>
+</div>
+
+<!-- ── Main ─────────────────────────────────────────────────────────── -->
+<main class="main">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── Footer ───────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer__logo">🛡️ NyayaShakti</div>
+  <div class="footer__tagline">Your Safety Is Not Negotiable. Your Power Is Real.</div>
+  <div class="footer__links">
+    <a href="{% url 'nyayashakthi:index' %}">Home</a>
+    <a href="{% url 'nyayashakthi:map' %}">Find Help</a>
+    <a href="{% url 'nyayashakthi:chat' %}">Support Chat</a>
+    <a href="{% url 'nyayashakthi:sos' %}">Emergency SOS</a>
+  </div>
+  <div class="footer__copy">© 2024 NyayaShakti. All rights reserved. Emergency: 112 | Women Helpline: 1091</div>
+</footer>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script>
+  // ── Hamburger menu ────────────────────────────────────────────────
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('drawer');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    drawer.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!hamburger.contains(e.target) && !drawer.contains(e.target)) {
+      hamburger.classList.remove('open');
+      drawer.classList.remove('open');
+    }
+  });
+
+  // ── Toast utility ─────────────────────────────────────────────────
+  function showToast(msg, type = '', duration = 3500) {
+    const t = document.createElement('div');
+    t.className = `toast ${type ? 'toast-' + type : ''}`;
+    t.textContent = msg;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(() => t.remove(), duration);
+  }
+  window.showToast = showToast;
+</script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

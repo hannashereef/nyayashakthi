@@ -1,0 +1,213 @@
+import json
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from datetime import datetime
+EMERGENCY_CONTACTS = [
+    {"name": "National Emergency", "phone": "112", "icon": "🚨"},
+    {"name": "Women Helpline", "phone": "1091", "icon": "👩"},
+    {"name": "Police Control Room", "phone": "100", "icon": "🚔"},
+    {"name": "Ambulance", "phone": "108", "icon": "🏥"},
+    {"name": "Child Helpline", "phone": "1098", "icon": "🧒"},
+    {"name": "Domestic Abuse", "phone": "181", "icon": "🛡️"},
+]
+HELP_CENTERS = [
+    {
+        "id": 1,
+        "name": "All Women Police Station – Chennai Central",
+        "type": "police",
+        "lat": 13.0827,
+        "lng": 80.2707,
+        "phone": "044-28447701",
+        "address": "Park Town, Chennai, Tamil Nadu",
+        "hours": "24/7",
+    },
+    {
+        "id": 2,
+        "name": "Government Kilpauk Medical College Hospital",
+        "type": "hospital",
+        "lat": 13.0887,
+        "lng": 80.2494,
+        "phone": "044-26421222",
+        "address": "Kilpauk, Chennai, Tamil Nadu",
+        "hours": "24/7",
+    },
+    {
+        "id": 3,
+        "name": "Snehi Women's Crisis Support Centre",
+        "type": "support",
+        "lat": 13.0640,
+        "lng": 80.2785,
+        "phone": "044-24640050",
+        "address": "T. Nagar, Chennai, Tamil Nadu",
+        "hours": "9 AM – 9 PM",
+    },
+    {
+        "id": 4,
+        "name": "One Stop Crisis Centre (OSC) – Egmore",
+        "type": "support",
+        "lat": 13.0762,
+        "lng": 80.2606,
+        "phone": "181",
+        "address": "Egmore, Chennai, Tamil Nadu",
+        "hours": "24/7",
+    },
+    {
+        "id": 5,
+        "name": "Royapettah Government Hospital",
+        "type": "hospital",
+        "lat": 13.0558,
+        "lng": 80.2659,
+        "phone": "044-28193777",
+        "address": "Royapettah, Chennai, Tamil Nadu",
+        "hours": "24/7",
+    },
+    {
+        "id": 6,
+        "name": "Chennai City Police HQ",
+        "type": "police",
+        "lat": 13.0612,
+        "lng": 80.2719,
+        "phone": "044-23452345",
+        "address": "Vepery, Chennai, Tamil Nadu",
+        "hours": "24/7",
+    },
+    {
+        "id": 7,
+        "name": "SNEHA India – Women Safety NGO",
+        "type": "support",
+        "lat": 13.0745,
+        "lng": 80.2100,
+        "phone": "044-24640050",
+        "address": "Anna Nagar, Chennai, Tamil Nadu",
+        "hours": "10 AM – 6 PM",
+    },
+    {
+        "id": 8,
+        "name": "Stanley Medical College Hospital",
+        "type": "hospital",
+        "lat": 13.1083,
+        "lng": 80.2876,
+        "phone": "044-25281501",
+        "address": "Old Jail Road, Chennai, Tamil Nadu",
+        "hours": "24/7",
+    },
+]
+VOLUNTEER_RESPONSES = [
+    "Hello! You're safe here. I'm listening. Please share what you're going through.",
+    "I hear you. You're not alone in this. Take your time.",
+    "Thank you for reaching out. This is a safe, anonymous space for you.",
+    "I'm here with you. What you're feeling matters.",
+    "You showed great courage by reaching out today. How can I support you?",
+    "Everything you share here is confidential and vanishes when you leave. Feel free to speak openly.",
+    "You deserve support. I'm glad you're here. Tell me more about what's happening.",
+    "It's okay to take a moment. I'm here whenever you're ready to continue.",
+    "Your safety and well-being are the top priority. Let's talk through this together.",
+]
+
+
+def index(request):
+    """Homepage with SOS button and feature overview."""
+    ctx = {
+        "emergency_contacts": EMERGENCY_CONTACTS,
+        "help_centers_count": len(HELP_CENTERS),
+    }
+    return render(request, "nyayashakthi/index.html", ctx)
+
+
+def map_view(request):
+    """Nearby help centres on OpenStreetMap."""
+    ctx = {
+        "help_centers_json": json.dumps(HELP_CENTERS),
+        "help_centers": HELP_CENTERS,
+    }
+    return render(request, "nyayashakthi/map.html", ctx)
+
+
+def chat_view(request):
+    """Anonymous support chat – client-side only, no storage."""
+    return render(request, "nyayashakthi/chat.html")
+
+
+def sos_view(request):
+    """Full-screen SOS page."""
+    ctx = {"emergency_contacts": EMERGENCY_CONTACTS}
+    return render(request, "nyayashakthi/sos.html", ctx)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_sos_alert(request):
+    """Receive SOS trigger with coords; return alert payload for SMS/share."""
+    try:
+        data = json.loads(request.body)
+        lat = data.get("lat", "Unknown")
+        lng = data.get("lng", "Unknown")
+        accuracy = data.get("accuracy", "Unknown")
+        timestamp = datetime.now().strftime("%d %b %Y, %I:%M %p IST")
+
+        maps_link = (
+            f"https://www.google.com/maps?q={lat},{lng}"
+            if lat != "Unknown"
+            else "Location unavailable"
+        )
+
+        sms_text = (
+            f"🚨 EMERGENCY SOS – NyayaShakti\n"
+            f"Time: {timestamp}\n"
+            f"Location: {maps_link}\n"
+            f"Accuracy: ±{accuracy}m\n"
+            f"Please respond IMMEDIATELY!"
+        )
+
+        whatsapp_link = f"https://wa.me/?text={sms_text.replace(' ', '%20').replace('\n', '%0A')}"
+
+        return JsonResponse({
+            "success": True,
+            "timestamp": timestamp,
+            "maps_link": maps_link,
+            "sms_text": sms_text,
+            "whatsapp_link": whatsapp_link,
+            "contacts": EMERGENCY_CONTACTS,
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+
+@require_http_methods(["GET"])
+def api_help_centers(request):
+    """Return help centres, optionally filtered by type."""
+    center_type = request.GET.get("type", None)
+    centers = HELP_CENTERS
+    if center_type:
+        centers = [c for c in centers if c["type"] == center_type]
+    return JsonResponse({"centers": centers, "total": len(centers)})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_chat_response(request):
+    """Return a volunteer-style response (stateless, no storage)."""
+    import random
+    try:
+        data = json.loads(request.body)
+        user_message = data.get("message", "").lower()
+        if any(w in user_message for w in ["help", "danger", "unsafe", "scared", "fear"]):
+            response = "Your safety comes first. If you're in immediate danger, please press the SOS button or call 112. I'm here with you."
+        elif any(w in user_message for w in ["abuse", "hit", "hurt", "violence", "beat"]):
+            response = "What you're describing is not okay and you deserve support. The Women Helpline (1091) can connect you with counsellors 24/7. You are not alone."
+        elif any(w in user_message for w in ["thank", "thanks", "ok", "okay", "good"]):
+            response = "You're doing great by reaching out. I'm here whenever you need to talk. Take care of yourself."
+        elif any(w in user_message for w in ["police", "report", "fir", "complaint"]):
+            response = "You have every right to file an FIR. The All Women Police Stations are available 24/7. I can show you the nearest one on the map. Visit the 'Find Help' section."
+        else:
+            response = random.choice(VOLUNTEER_RESPONSES)
+
+        return JsonResponse({
+            "success": True,
+            "response": response,
+            "timestamp": datetime.now().strftime("%I:%M %p"),
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
